@@ -13,12 +13,18 @@ classifiers = [
     "Operating System :: OS Independant"
 ]
 dependencies = [
-    "ipython"
+    "pyyaml"
 ]
 
 [project.urls]
 "Homepage" = "https://github.com/TutteInstitute/adhoconda"
 
+[project.scripts]
+makenv = "adhoconda._makenv:main"
+
 [build-system]
 requires = ["setuptools>=43.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-data = {"adhoconda" = ["environment.yml"]}
