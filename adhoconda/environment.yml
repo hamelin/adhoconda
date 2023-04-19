@@ -1,8 +1,4 @@
 dependencies:
-    - ipywidgets
     - jupyterlab
     - pip
     - python>=3.8
-    - requests
-    - setuptools
-    - wheel
