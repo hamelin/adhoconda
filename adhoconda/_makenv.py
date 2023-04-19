@@ -67,7 +67,7 @@ def parse_args():
         "--yes",
         action="store_true",
         default=False,
-        help="No pause for validating the setup commands."
+        help="No interactive pause for validating the setup commands."
     )
     return parser.parse_args()
 
