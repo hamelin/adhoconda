@@ -1,6 +1,6 @@
 [project]
 name = "adhoconda"
-version = "0.1"
+version = "0.2"
 description = "Ad hoc IPython kernels based on Conda environments, with on-the-fly dependency updates"
 authors = [{name = "Benoit Hamelin", email = "benoit@benoithamelin.com"}]
 readme = "README.md"
