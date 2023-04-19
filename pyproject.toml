@@ -1,0 +1,24 @@
+[project]
+name = "adhoconda"
+version = "0.1"
+description = "Ad hoc IPython kernels based on Conda environments, with on-the-fly dependency updates"
+authors = [{name = "Benoit Hamelin", email = "benoit@benoithamelin.com"}]
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independant"
+]
+dependencies = [
+    "ipython"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/TutteInstitute/adhoconda"
+
+[build-system]
+requires = ["setuptools>=43.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
