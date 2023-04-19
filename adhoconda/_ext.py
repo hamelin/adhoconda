@@ -1,3 +1,4 @@
+from ._common import conda_executable, Error
 from IPython.display import display, DisplayObject, Markdown
 from pathlib import Path
 import re
@@ -37,10 +38,6 @@ def condaenv(line: str = "", cell: str = "") -> Optional[DisplayObject]:
             return conda_env_update(Path(file_env.name))
 
 
-class Error(Exception):
-    pass
-
-
 def get_path_env() -> Path:
     dir_bin = Path(sys.executable).parent
     if dir_bin.name == "bin":
@@ -53,19 +50,10 @@ def get_path_env() -> Path:
     )
 
 
-RX_CONDA_ENV_ALTER = re.compile(r"# cmd: (?P<condadir>.+)/bin/conda(-env)? ")
-
-
 def conda_env_update(path: Path) -> Optional[DisplayObject]:
     try:
         path_env = get_path_env()
-        for line in iter_lines_env_history(path_env):
-            if m := RX_CONDA_ENV_ALTER.match(line):
-                path_conda = Path(m["condadir"]) / "bin" / "conda"
-                if path_conda.is_file():
-                    break
-        else:
-            raise Error(f"unable to find conda executable")
+        path_conda = conda_executable(path_env)
 
         command = [
             str(path_conda),
@@ -83,14 +71,3 @@ def conda_env_update(path: Path) -> Optional[DisplayObject]:
         return Markdown("Environment successfully updated.")
     except Error as err:
         return Markdown(f"**Error**: {err}")
-
-
-def iter_lines_env_history(path_env: Path) -> Iterator[str]:
-    path_history = path_env / "conda-meta" / "history"
-    if not path_history.is_file():
-        raise Error(
-            f"environment under {path_env} does not have the hallmarks of a "
-            "Conda environment"
-        )
-    with path_history.open(mode="rt", encoding="utf-8") as file:
-        yield from file
