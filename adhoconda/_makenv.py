@@ -15,7 +15,7 @@ import yaml
 
 
 LOG = lg.getLogger(__name__)
-_path_fallback = Path(f"~/.config/{NAME_PACKAGE}/environment.yml").expanduser()
+_path_home_env = Path(f"~/.config/{NAME_PACKAGE}/environment.yml").expanduser()
 
 
 def parse_args():
@@ -59,8 +59,9 @@ def parse_args():
         "-e",
         "--env",
         help=(
-            "Use this environment instead of the one in the current directory, "
-            "or the fallback."
+            "Use this environment instead of the home environment. "
+            "Remark that if this environment carries either its own `name` or "
+            "`prefix` fields, they will be ignored."
         )
     )
     parser.add_argument(
@@ -77,31 +78,29 @@ def environment_resource() -> str:
     return (resources.files(NAME_PACKAGE) / "environment.yml").read_text()
 
 
-def set_up_fallback():
+def set_up_home_env():
     try:
-        if not _path_fallback.parent.is_dir():
+        if not _path_home_env.parent.is_dir():
             LOG.debug("Create configuration directory.")
-            _path_fallback.parent.mkdir(parents=True, exist_ok=True)
-        if not _path_fallback.is_file():
-            _path_fallback.write_text(environment_resource())
-            LOG.info(f"Set up fallback environment at {_path_fallback}")
+            _path_home_env.parent.mkdir(parents=True, exist_ok=True)
+        if not _path_home_env.is_file():
+            _path_home_env.write_text(environment_resource())
+            LOG.info(f"Set up the home environment at {_path_home_env}")
     except IOError:
         LOG.error(
-            "Error while setting up fallback environment. Will retry on next run."
+            "Error while setting up the home environment. Will retry on next run."
         )
 
 
 def get_environment_file(args: Namespace) -> Path:
-    if args.env is not None:
+    if args.file is not None:
         path_env = Path(args.env)
-    elif not args.fallback and (path_env := Path("environment.yml")).is_file():
-        pass
-    elif _path_fallback.is_file():
-        path_env = _path_fallback
+    elif _path_home_env.is_file():
+        path_env = _path_home_env
     else:
         with tf.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False) as file:
             file.write(environment_resource())
-            path_env = file.name
+            path_env = Path(file.name)
 
     if not os.access(path_env, os.R_OK):
         raise IOError(f"Cannot access environment file {path_env}")
@@ -189,7 +188,7 @@ def validate(
 
 def main():
     lg.basicConfig(level=lg.DEBUG, format="%(message)s")
-    set_up_fallback()
+    set_up_home_env()
     args = parse_args()
     envfile = get_environment_file(args).resolve()
     cmd_conda, envhandle = prepare_env_create(args, envfile)
