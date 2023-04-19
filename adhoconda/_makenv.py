@@ -1,5 +1,6 @@
 from ._common import NAME_PACKAGE, conda_executable
 from argparse import ArgumentParser, Namespace
+import atexit
 from dataclasses import dataclass
 import importlib.resources as resources
 import logging as lg
@@ -98,6 +99,7 @@ def get_environment_file(args: Namespace) -> Path:
         with tf.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False) as file:
             file.write(environment_resource())
             path_env = Path(file.name)
+            atexit.register(path_env.unlink)
 
     if not os.access(path_env, os.R_OK):
         raise IOError(f"Cannot access environment file {path_env}")
