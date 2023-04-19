@@ -9,11 +9,7 @@ license = {file = "LICENSE"}
 classifiers = [
     "Programming Language :: Python :: 3",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independant"
-]
-dependencies = [
-    "pyyaml"
+    "License :: OSI Approved :: MIT License"
 ]
 
 [project.urls]

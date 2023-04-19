@@ -11,7 +11,6 @@ import subprocess as sp
 import sys
 import tempfile as tf
 from typing import *
-import yaml
 
 
 LOG = lg.getLogger(__name__)
@@ -29,35 +28,33 @@ def parse_args():
     parser.add_argument(
         "-n",
         "--name",
-        help="Technical name for the environment and kernel."
+        help=(
+            "Technical name for the environment and kernel. "
+            "By default, the environment name is set as the kernel's display name, "
+            "but prefixed with `adhoc-`, lowercased, and with all non-alphanumeric "
+            "characters replaced with dashes."
+        )
     )
     parser.add_argument(
         "-N",
         "--kernel-name",
-        help="Technical name for the kernel only; does not name the environment."
+        help=(
+            "Technical name for the kernel only; does not name the environment. "
+            "By default, we use the environment's technical name."
+        )
     )
     parser.add_argument(
-        "-d",
-        "--directory",
-        default="./.conda-env",
+        "-p",
+        "--prefix",
         help=(
             "Directory where to set up the environment. "
-            "If the environment is named, this argument is ignored."
+            "The resulting environment will not be named. "
+            "This overrides the `-n` option."
         )
     )
     parser.add_argument(
-        "-F",
-        "--fallback",
-        action="store_true",
-        default=False,
-        help=(
-            "Force using fallback environment even if another one exists in the "
-            "current directory."
-        )
-    )
-    parser.add_argument(
-        "-e",
-        "--env",
+        "-f",
+        "--file",
         help=(
             "Use this environment instead of the home environment. "
             "Remark that if this environment carries either its own `name` or "
@@ -111,36 +108,24 @@ Command = List[str]
 Handle = Tuple[str, str]
 
 
-def prepare_env_create(args: Namespace, envfile: Path) -> Tuple[Command, Handle]:
-    if args.name is not None:
-        args_conda = ["-n", args.name]
-    else:
-        env = yaml.safe_load(envfile.read_text(encoding="utf-8"))
-        if "name" in env:
-            args_conda = ["-n", env["name"]]
-        else:
-            args_conda = ["-p", args.directory]
+def get_name_env(args: Namespace, envfile: Path) -> str:
+    return args.name or "adhoc-" + re.sub(r"[^a-z0-9]", "-", args.display_name.lower())
+
+
+def prepare_env_create(
+    args: Namespace,
+    name_env: str,
+    envfile: Path
+) -> Tuple[Command, Handle]:
+    handle = ("-p", args.prefix) if args.prefix else ("-n", name_env)
     return (
-        [
-            conda_executable(),
-            "env",
-            "update",
-            "--file",
-            str(envfile),
-            *args_conda
-        ],
-        tuple(args_conda)
+        [conda_executable(), "env", "update", "--file", str(envfile), *handle],
+        handle
     )
 
 
-def prepare_kernel_install(args: Namespace, handle: Handle) -> Command:
-    if args.kernel_name is not None:
-        name_kernel = args.kernel_name
-    elif args.name is not None:
-        name_kernel = args.name
-    else:
-        name_kernel = re.sub(r"[^a-z0-9_]", "_", args.display_name.lower())
-
+def prepare_kernel_install(args: Namespace, name_env: str, handle: Handle) -> Command:
+    name_kernel = args.kernel_name or name_env
     return [
         conda_executable(),
         "run",
@@ -191,8 +176,9 @@ def main():
     set_up_home_env()
     args = parse_args()
     envfile = get_environment_file(args).resolve()
-    cmd_conda, envhandle = prepare_env_create(args, envfile)
-    cmd_ipykernel = prepare_kernel_install(args, envhandle)
+    name_env = get_name_env(args, envfile)
+    cmd_conda, envhandle = prepare_env_create(args, name_env, envfile)
+    cmd_ipykernel = prepare_kernel_install(args, name_env, envhandle)
     if not args.yes:
         validate(envfile, envhandle, cmd_conda, cmd_ipykernel)
 
