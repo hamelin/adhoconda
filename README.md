@@ -146,3 +146,6 @@ The point of **adhoconda** is to push notebook authors to publish their environm
 
 - Jupyter Lab extension to provide the features of slightly awkward script `makenv`.
 - Easier management of ad hoc environments and kernels: when is it a good moment to delete them?
+- Auto-install Conda when it is not available (ask?)
+- Speak cogently with the user when their kernel environment is not a Conda environment.
+- Instead of having a single *home* environment, manage a small set of environment recipes.
