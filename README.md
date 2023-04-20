@@ -88,6 +88,15 @@ This creates a Conda environment named `adhoc-brave-new-world`, a IPython kernel
 One can then either activate this environment and run Jupyter Lab (or Notebook) from there to open the notebook they downloaded.
 If one is working out of a running Jupyter instance (say, through Jupyterhub), then they can open the notebook and set its kernel to *Brave New World*.
 
+#### What's in my new environment?
+
+By default, `makenv` puts together what it calls a *home environment*.
+This is described in a file that `makenv` puts at `$HOME/.config/adhoconda/environment.yml` the first time it runs,
+and that the user can modify at will to add bells and whistles one uses,
+or to pin package versions to match some local constraints (which may limit sharing possibilities).
+The provided home environment description is minimalistic, including only Python and Jupyter Lab.
+In any case, were the user to require putting together a ad hoc environment based on an alternative YAML description, they can specify it through the `--file` flag of the `makenv` command.
+
 ### Solving a notebook's dependencies
 
 Now, the author of the downloaded notebook exposed how the Conda environment from where they worked.
@@ -115,6 +124,7 @@ dependencies:
     - pip:
         - duckdb
         - sparse
+        - umap-learn
 ```
 
 This runs `conda env update` with the content of the cell written to a temporary YAML file, to use as environment descriptor.
@@ -134,4 +144,5 @@ The point of **adhoconda** is to push notebook authors to publish their environm
 
 ## TODO
 
-- Implement a Jupyter Lab extension to support the features of slightly awkward script `makenv`.
+- Jupyter Lab extension to provide the features of slightly awkward script `makenv`.
+- Easier management of ad hoc environments and kernels: when is it a good moment to delete them?
