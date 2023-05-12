@@ -142,6 +142,32 @@ This stands to make the notebook resilient to API deprecations and bug introduct
 Obviously, such Conda-backed kernels can also support **ipydeps** and other similar PyPI-only environment builder.
 The point of **adhoconda** is to push notebook authors to publish their environments, so that replicating their computations does not have to start with a reverse engineering job.
 
+#### How does `conda` get invoked?
+
+Since the Conda package manager is often installed in the scope of a user account as opposed to a full host system,
+and since one may prefer using its drop-in replacement [Mamba](https://mamba.readthedocs.io/en/latest/),
+we leverage a hierarchy of heuristics to grab the path to the `conda` (or `mamba`) executable.
+The scheme is as follows:
+
+1. Resolve environment variable `ADHOCONDA_EXE`: if it's not empty, it's used as our `conda` command.
+1. Resolve environment variable `CONDA_EXE`: if it's not empty, it's used as our `conda` command.
+1. If we have the luxury of knowing the path to the environment that Python runs from, we look up its corresponding Conda History file, and extract the Conda executable from there if a line that reliably gives it away can be found.
+1. We use `shutil.which` to look up the `conda` moniker, and use its output except failure.
+1. We try a dry run of command `conda --help`; if this succeeds, the Conda executable simply is `conda`.
+
+If Conda can't be found after all that, we throw our hands up.
+Please set up environment variable `ADHOCONDA_EXE` to assist.
+
+**Mamba user?** Set environment variable `ADHOCONDA_EXE` to the path where your Mamba executable lives. You can learn that using Python:
+
+```python
+import shutil
+print(shutil.which("mamba"))
+```
+
+It's also highly likely that simply setting  environment variable`ADHOCONDA_EXE` to `mamba` will also work.
+However, when hopping between virtual environments, using full paths avoid surprise errors.
+
 ## TODO
 
 - Jupyter Lab extension to provide the features of slightly awkward script `makenv`.
