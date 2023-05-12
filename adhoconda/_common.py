@@ -16,6 +16,8 @@ class Error(Exception):
 
 
 def conda_executable(path_env: Optional[Path] = None) -> str:
+    if "ADHOCONDA_EXE" in os.environ:
+        return os.environ["ADHOCONDA_EXE"]
     if "CONDA_EXE" in os.environ:
         return os.environ["CONDA_EXE"]
 
