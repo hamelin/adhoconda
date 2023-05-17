@@ -8,9 +8,6 @@ from typing import *
 __all__ = []
 
 
-NAME_PACKAGE = re.sub(r"(.+)\._common", r"\1", __name__)
-
-
 class Error(Exception):
     pass
 

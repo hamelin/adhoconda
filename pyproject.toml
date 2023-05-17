@@ -11,6 +11,10 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License"
 ]
+dependencies = [
+    "jupyter-core",
+    "pyyaml"
+]
 
 [project.urls]
 "Homepage" = "https://github.com/TutteInstitute/adhoconda"
